@@ -1,3 +1,8 @@
+## [1.0.1] - 2026-07-05
+
+### Changed
+- Comprehensive README: table of contents, scan-lifecycle sequence diagram, plugin catalog, scan-modes matrix, VS Code extension section, and an FAQ.
+
 ## [1.0.0] - 2026-07-05
 
 First public release as **harvest-scan** (CLI command `harvest`). Complete foundation overhaul.
