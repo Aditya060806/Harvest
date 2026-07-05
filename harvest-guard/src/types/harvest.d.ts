@@ -1,4 +1,4 @@
-declare module 'harvest-clo' {
+declare module 'harvest-scan' {
   export type Severity = 'error' | 'warning' | 'info';
 
   export interface ScanOptions {

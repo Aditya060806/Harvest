@@ -1,16 +1,16 @@
 <div align="center">
 
-# 🌾 harvest-clo
+# 🌾 harvest-scan
 
 **Fast, plugin-driven security & code-quality scanner — one command, one score.**
 
 Scan your code for security risks and quality issues with a suite of composable plugins, get a single **0–100 score** and letter **grade**, with actionable file-and-line feedback. Runs locally, in CI, and in your editor.
 
 [![CI](https://github.com/Aditya060806/Harvest/actions/workflows/ci.yml/badge.svg)](https://github.com/Aditya060806/Harvest/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/harvest-clo.svg)](https://www.npmjs.com/package/harvest-clo)
-[![Downloads](https://img.shields.io/npm/dt/harvest-clo.svg)](https://www.npmjs.com/package/harvest-clo)
+[![npm version](https://img.shields.io/npm/v/harvest-scan.svg)](https://www.npmjs.com/package/harvest-scan)
+[![Downloads](https://img.shields.io/npm/dt/harvest-scan.svg)](https://www.npmjs.com/package/harvest-scan)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node](https://img.shields.io/node/v/harvest-clo.svg)](https://www.npmjs.com/package/harvest-clo)
+[![Node](https://img.shields.io/node/v/harvest-scan.svg)](https://www.npmjs.com/package/harvest-scan)
 
 [Quick start](#-quick-start) · [How it works](#-how-it-works) · [Comparison](#-how-harvest-compares) · [Scoring](#-scoring-model) · [Performance](#-performance--efficiency) · [CLI](#-cli-reference) · [CI](#-github-action)
 
@@ -19,7 +19,7 @@ Scan your code for security risks and quality issues with a suite of composable 
 ---
 
 ```console
-$ npx harvest-clo src/
+$ npx harvest-scan src/
 
   B+  87/100  ███████████████████░░░░░  good
   0 error  4 warning  0 info  · 4 total · 210ms
@@ -49,10 +49,10 @@ $ npx harvest-clo src/
 
 ```bash
 # Try it instantly, no install
-npx harvest-clo .
+npx harvest-scan .
 
 # Or install globally (command is `harvest`)
-npm install -g harvest-clo
+npm install -g harvest-scan
 harvest .
 ```
 
@@ -274,7 +274,7 @@ Harvest also records each run's score in `.harvest/history.json` and prints the 
 ## 🧑‍💻 Programmatic API
 
 ```js
-import { scan, fix } from 'harvest-clo';
+import { scan, fix } from 'harvest-scan';
 
 await fix('src/');                                   // optional autofix pass
 const result = await scan('src/', { mode: 'complete' });

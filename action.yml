@@ -42,13 +42,13 @@ runs:
         if [ "${{ inputs.baseline }}" = "true" ]; then BASELINE_FLAG="--baseline"; fi
 
         set +e
-        npx --yes harvest-clo@latest "${{ inputs.target }}" \
+        npx --yes harvest-scan@latest "${{ inputs.target }}" \
           --${{ inputs.mode }} $BASELINE_FLAG \
           --sarif -o "${{ inputs.sarif-file }}" --no-banner
         SARIF_CODE=$?
 
         # Human-readable summary in the log
-        npx --yes harvest-clo@latest "${{ inputs.target }}" --${{ inputs.mode }} $BASELINE_FLAG --no-banner || true
+        npx --yes harvest-scan@latest "${{ inputs.target }}" --${{ inputs.mode }} $BASELINE_FLAG --no-banner || true
 
         if [ "${{ inputs.fail-on-error }}" = "true" ] && [ $SARIF_CODE -ne 0 ]; then
           echo "::error::Harvest scan reported issues (exit $SARIF_CODE)."

@@ -1,6 +1,6 @@
 ## [1.0.0] - 2026-07-05
 
-First public release as **harvest-clo** (CLI command `harvest`). Complete foundation overhaul.
+First public release as **harvest-scan** (CLI command `harvest`). Complete foundation overhaul.
 
 ### Added
 - Single consolidated scanning engine in `@harvest/core` used by the CLI, REST API, and editor.
