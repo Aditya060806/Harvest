@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { scan, type Severity } from 'harvest';
+import { scan, type Severity } from 'harvest-clo';
 
 export function activate(ctx: vscode.ExtensionContext) {
   const diag = vscode.languages.createDiagnosticCollection('harvest-guard');

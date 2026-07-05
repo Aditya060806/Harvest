@@ -5,7 +5,7 @@ import { program } from 'commander';
 import chalk from 'chalk';
 import figlet from 'figlet';
 
-import { scan } from './index.js';
+import { scan, fix } from './index.js';
 import { formatHuman, toSarif, grade } from './reporter.js';
 import { recordHistory, saveBaseline, loadBaseline, fingerprint } from './history.js';
 import { listPlugins, enablePlugin, disablePlugin, createPlugin } from './plugin-manager.js';
@@ -38,6 +38,7 @@ program
   .option('-i, --incremental', 'scan only files changed vs git HEAD')
   .option('-p, --plugin <name>', 'run only a single plugin')
   .option('--baseline', 'only fail on issues that are not in the saved baseline')
+  .option('--fix', 'apply safe autofixes (ESLint) before scanning')
   .option('--no-banner', 'hide the ASCII banner')
   .action(async (target, opts) => {
     const mode = opts.fast ? 'fast' : opts.complete ? 'complete' : 'default';
@@ -47,6 +48,21 @@ program
     if (!quiet && opts.banner !== false) banner();
 
     try {
+      if (opts.fix) {
+        const fixResult = await fix(target);
+        if (!quiet) {
+          if (!fixResult.ran) {
+            console.log(chalk.gray('  fix: nothing to autofix (no JS/TS files or ESLint unavailable).'));
+          } else if (fixResult.filesChanged) {
+            console.log(
+              chalk.green(`  ✓ Autofixed ${fixResult.filesChanged} file(s) of ${fixResult.filesScanned} scanned.`)
+            );
+          } else {
+            console.log(chalk.gray(`  fix: no autofixable issues in ${fixResult.filesScanned} file(s).`));
+          }
+        }
+      }
+
       const result = await scan(target, {
         mode,
         incremental: opts.incremental,

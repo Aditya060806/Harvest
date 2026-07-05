@@ -35,7 +35,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "dependencies": {
-    "harvest": "file:.."
+    "harvest-clo": "file:.."
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

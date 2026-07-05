@@ -52,7 +52,15 @@ export interface ScanOptions {
   config?: unknown;
 }
 
+export interface FixResult {
+  ran: boolean;
+  filesScanned: number;
+  filesChanged: number;
+  changedFiles: string[];
+}
+
 export function scan(target: string | string[], options?: ScanOptions): Promise<ScanResult>;
+export function fix(target?: string): Promise<FixResult>;
 export function getRating(score: number): Rating;
 export const DEFAULT_WEIGHTS: Record<string, number>;
 

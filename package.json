@@ -1,11 +1,12 @@
 {
-  "name": "harvest",
+  "name": "harvest-clo",
   "version": "6.0.1",
-  "description": "Command-line tool for detecting vulnerabilities in files and directories.",
+  "description": "Fast, plugin-driven security & code-quality scanner with a single 0-100 score, SARIF output, autofix, and a GitHub Action.",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": {
-    "harvest": "./cli.js"
+    "harvest": "./cli.js",
+    "harvest-clo": "./cli.js"
   },
   "private": false,
   "workspaces": [
@@ -22,6 +23,8 @@
     "lint:fix": "eslint \"**/*.{js,ts}\" --config .eslintrc.cjs --fix",
     "format": "prettier --write \"**/*.{js,ts,json,md}\"",
     "start-api": "node ./src/api.js",
+    "scan": "node ./cli.js",
+    "prepublishOnly": "npm test",
     "postinstall": "node ./postinstall.cjs",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",

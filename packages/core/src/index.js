@@ -13,9 +13,16 @@ import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
+import crypto from 'node:crypto';
+import { createRequire } from 'node:module';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { globby } from 'globby';
 
 import { Plugin } from './plugin-interface.js';
+
+const execFileAsync = promisify(execFile);
+const JS_EXT = new Set(['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PLUGINS_DIR = path.resolve(__dirname, '../plugins');
@@ -346,6 +353,75 @@ export function scan(target, options = {}) {
   }
 
   return performScan(resolvedTarget, options);
+}
+
+async function hashFile(filePath) {
+  try {
+    const buf = await fs.readFile(filePath);
+    return crypto.createHash('sha1').update(buf).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
+function resolveEslintBin() {
+  try {
+    const requireCJS = createRequire(import.meta.url);
+    const eslintMain = requireCJS.resolve('eslint');
+    return path.resolve(path.dirname(eslintMain), '../bin/eslint.js');
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Apply deterministic autofixes via ESLint's `--fix` over JS/TS files.
+ * Uses the project's own ESLint config; files without a resolvable config
+ * are left untouched. Returns how many files actually changed on disk.
+ *
+ * @param {string} target
+ * @returns {Promise<{ ran: boolean, filesScanned: number, filesChanged: number, changedFiles: string[] }>}
+ */
+export async function fix(target = '.') {
+  const all = await discoverFiles(target, false);
+  const files = all.filter((f) => JS_EXT.has(path.extname(f).toLowerCase()));
+  if (!files.length) return { ran: false, filesScanned: 0, filesChanged: 0, changedFiles: [] };
+
+  const eslintBin = resolveEslintBin();
+  if (!eslintBin) return { ran: false, filesScanned: files.length, filesChanged: 0, changedFiles: [] };
+
+  const before = new Map();
+  for (const f of files) before.set(f, await hashFile(f));
+
+  const resolved = path.resolve(target);
+  let runCwd = resolved;
+  try {
+    if (!(await fs.stat(resolved)).isDirectory()) runCwd = path.dirname(resolved);
+  } catch {
+    runCwd = process.cwd();
+  }
+
+  try {
+    await execFileAsync(process.execPath, [eslintBin, resolved, '--fix'], {
+      cwd: runCwd,
+      maxBuffer: 20 * 1024 * 1024,
+    });
+  } catch {
+    // ESLint exits non-zero when unfixable problems remain — fixes are still written.
+  }
+
+  const changedFiles = [];
+  for (const f of files) {
+    const after = await hashFile(f);
+    if (after !== before.get(f)) changedFiles.push(f);
+  }
+
+  return {
+    ran: true,
+    filesScanned: files.length,
+    filesChanged: changedFiles.length,
+    changedFiles,
+  };
 }
 
 export default scan;
