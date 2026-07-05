@@ -1,0 +1,60 @@
+name: Auto Release
+
+# On every push to main: bump the patch version, commit + tag it, and publish
+# to npm using OIDC trusted publishing (no tokens). The version-bump commit is
+# pushed with the default GITHUB_TOKEN, which does NOT re-trigger workflows —
+# so there is no infinite release loop.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: auto-release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write # push the version-bump commit + tag
+  id-token: write # OIDC trusted publishing + provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Skip if the head commit is already a release bump (belt-and-suspenders).
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Prepare npm for OIDC (no auth placeholder)
+        run: |
+          npm install -g npm@latest
+          npm config set registry https://registry.npmjs.org/
+          npm -v
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump patch version (creates commit + tag)
+        id: bump
+        run: |
+          NEW_VERSION=$(npm version patch -m "chore(release): %s")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Push commit and tag
+        run: git push --follow-tags origin main
+
+      - name: Publish (OIDC trusted publishing)
+        run: npm publish --access public
+        env:
+          NPM_CONFIG_PROVENANCE: 'true'
