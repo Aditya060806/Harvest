@@ -1,6 +1,6 @@
 {
   "name": "harvest-scan",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Fast, plugin-driven security & code-quality scanner with a single 0-100 score, SARIF output, autofix, and a GitHub Action.",
   "main": "index.js",
   "types": "index.d.ts",
