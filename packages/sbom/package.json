@@ -1,0 +1,36 @@
+{
+  "name": "@harvest/sbom",
+  "version": "6.0.1",
+  "description": "Software Bill of Materials (CycloneDX/SARIF) generator with OSV enrichment for Harvest.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p ./"
+  },
+  "dependencies": {
+    "license-checker-rseidelsohn": "^4.3.0",
+    "node-fetch": "^3.3.2",
+    "p-limit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/sarif": "^2.1.7"
+  },
+  "license": "MIT",
+  "author": "Aditya Pandey [https://github.com/Aditya060806]",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aditya060806/Harvest",
+    "directory": "packages/sbom"
+  }
+}

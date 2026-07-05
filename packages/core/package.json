@@ -1,0 +1,40 @@
+{
+  "name": "@harvest/core",
+  "version": "6.0.1",
+  "description": "Core scanning engine and plugins for Harvest.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./plugin-interface": {
+      "import": "./src/plugin-interface.js"
+    }
+  },
+  "files": [
+    "src",
+    "plugins",
+    "types",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc -p ./"
+  },
+  "dependencies": {
+    "@nodesecure/js-x-ray": "^3.2.0",
+    "compromise": "^14.14.0",
+    "globby": "^14.0.2",
+    "node-fetch": "^3.3.2",
+    "typhonjs-escomplex": "^0.1.0"
+  },
+  "license": "MIT",
+  "author": "Aditya Pandey [https://github.com/Aditya060806]",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aditya060806/Harvest",
+    "directory": "packages/core"
+  }
+}

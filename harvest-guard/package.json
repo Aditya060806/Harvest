@@ -1,0 +1,53 @@
+{
+  "name": "harvest-guard",
+  "displayName": "Harvest Guard",
+  "description": "In-editor vulnerability and code-quality scanning powered by Harvest.",
+  "version": "6.0.1",
+  "publisher": "Aditya060806",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "harvest-guard.scanFile",
+        "title": "Harvest Guard: Scan Current File"
+      },
+      {
+        "command": "harvest-guard.scanWorkspace",
+        "title": "Harvest Guard: Scan Workspace"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "dependencies": {
+    "harvest": "file:.."
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@vscode/test-electron": "^2.3.9",
+    "typescript": "^5.4.0"
+  },
+  "license": "MIT",
+  "author": "Aditya Pandey [https://github.com/Aditya060806]",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aditya060806/Harvest",
+    "directory": "harvest-guard"
+  }
+}

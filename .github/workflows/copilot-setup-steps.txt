@@ -1,0 +1,47 @@
+name: "Copilot Setup Steps"
+
+# Trigger only when this file changes, so you can validate it via Actions
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # This exact job name is required
+  copilot-setup-steps:
+    # Use GitHub’s Ubuntu runner (or change per your needs)
+    runs-on: ubuntu-latest
+    # Give only the minimal permissions Copilot needs
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Match your local dev (v20 is a good default)
+          node-version: "20"
+          #cache: "npm"
+          #cache-dependency-path: "package-lock.json"
+
+      - name: Install project dependencies
+        run: npm i
+
+      - name: Install GitHub Copilot CLI extension
+        run: gh extension install github/gh-copilot
+
+      - name: Ask Copilot a test question
+        run: gh copilot suggest "what is 2 + 2?"
+
+      - name: Warn about Copilot CLI auth limitations
+        run: |
+          echo "⚠️ Copilot CLI authentication requires an interactive 'gh auth login --web' session and is not supported in non-interactive CI environments like GitHub Actions."

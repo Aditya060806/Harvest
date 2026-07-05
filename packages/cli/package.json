@@ -1,0 +1,28 @@
+{
+  "name": "@harvest/cli",
+  "version": "6.0.1",
+  "description": "Standalone SBOM CLI for Harvest.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "harvest-sbom": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p ./"
+  },
+  "dependencies": {
+    "@harvest/sbom": "workspace:*",
+    "commander": "^14.0.0"
+  },
+  "license": "MIT",
+  "author": "Aditya Pandey [https://github.com/Aditya060806]",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aditya060806/Harvest",
+    "directory": "packages/cli"
+  }
+}
