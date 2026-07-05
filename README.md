@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Aditya060806/Harvest/refs/heads/main/img/logo.png" width="140" height="140" alt="Harvest logo">
-
-# 🥕 harvest-clo
+# 🌾 harvest-clo
 
 **Fast, plugin-driven security & code-quality scanner — one command, one score.**
 
@@ -362,4 +360,4 @@ Please add tests for changes and run `npm test` before opening a PR.
 
 [MIT](LICENSE) © [Aditya Pandey](https://github.com/Aditya060806)
 
-<div align="center"><sub>Built with 🥕 by Aditya Pandey</sub></div>
+<div align="center"><sub>Built with 🌾 by Aditya Pandey</sub></div>
