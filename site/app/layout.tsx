@@ -32,9 +32,25 @@ export const metadata: Metadata = {
   icons: { icon: '/favicon.svg' },
 };
 
+const themeScript = `
+(function () {
+  try {
+    var t = localStorage.getItem('theme');
+    var d = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (t === null) d = true; // default to dark
+    document.documentElement.classList.toggle('dark', d);
+  } catch (e) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>{children}</body>
     </html>
   );

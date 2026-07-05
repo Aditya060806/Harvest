@@ -17,10 +17,10 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 py-24">
         <Reveal className="mb-12 text-center">
           <SectionLabel>Live output</SectionLabel>
-          <h2 className="mt-5 text-4xl font-bold text-white sm:text-5xl">
+          <h2 className="mt-5 text-4xl font-bold text-strong sm:text-5xl">
             Actionable feedback, not a wall of noise
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-zinc-400">
+          <p className="mx-auto mt-4 max-w-2xl text-muted">
             Grouped by file, colour-coded by severity, with a score bar and a trend since your last run.
           </p>
         </Reveal>

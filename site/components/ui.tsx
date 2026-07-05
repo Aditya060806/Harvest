@@ -43,12 +43,12 @@ export function CommandLine({ command }: { command: string }) {
   return (
     <button
       onClick={copy}
-      className="group flex w-full items-center justify-between gap-4 rounded-xl border border-white/10 bg-ink-900/80 px-4 py-3 text-left font-mono text-sm transition hover:border-harvest-500/40"
+      className="group flex w-full items-center justify-between gap-4 rounded-xl border border-line/10 bg-card/80 px-4 py-3 text-left font-mono text-sm shadow-sm transition hover:border-harvest-500/40"
     >
       <span className="truncate">
-        <span className="text-harvest-400">$</span> <span className="text-zinc-200">{command}</span>
+        <span className="text-harvest-500">$</span> <span className="text-fg">{command}</span>
       </span>
-      <span className="shrink-0 text-xs text-zinc-500 group-hover:text-harvest-400">
+      <span className="shrink-0 text-xs text-muted group-hover:text-harvest-500">
         {copied ? 'copied ✓' : 'copy'}
       </span>
     </button>
@@ -57,7 +57,7 @@ export function CommandLine({ command }: { command: string }) {
 
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-harvest-500/30 bg-harvest-500/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-harvest-300">
+    <span className="inline-flex items-center gap-2 rounded-full border border-harvest-500/30 bg-harvest-500/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-harvest-600 dark:text-harvest-300">
       {children}
     </span>
   );

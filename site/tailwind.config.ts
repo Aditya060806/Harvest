@@ -1,10 +1,18 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  darkMode: 'class',
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
+        // Semantic, theme-aware tokens (driven by CSS vars in globals.css)
+        bg: 'rgb(var(--bg) / <alpha-value>)',
+        card: 'rgb(var(--card) / <alpha-value>)',
+        fg: 'rgb(var(--fg) / <alpha-value>)',
+        strong: 'rgb(var(--strong) / <alpha-value>)',
+        muted: 'rgb(var(--muted) / <alpha-value>)',
+        line: 'rgb(var(--line) / <alpha-value>)',
         harvest: {
           50: '#fff7ed',
           100: '#ffedd5',
@@ -13,13 +21,6 @@ const config: Config = {
           500: '#f97316',
           600: '#ea580c',
           700: '#c2410c',
-        },
-        ink: {
-          950: '#08090c',
-          900: '#0b0d11',
-          800: '#12151b',
-          700: '#1a1e26',
-          600: '#262b35',
         },
       },
       fontFamily: {
@@ -30,9 +31,6 @@ const config: Config = {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-8px)' },
-        },
-        shimmer: {
-          '100%': { transform: 'translateX(100%)' },
         },
       },
       animation: {
