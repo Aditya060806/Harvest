@@ -8,3 +8,32 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 **/*.ts
+
+# --- Slim the bundle ---------------------------------------------------------
+# harvest-scan pulls these in for its CLI banner and REST API. The extension
+# only uses the scan engine (globby, compromise, node-fetch, js-x-ray,
+# typhonjs-escomplex), so these are dead weight and safe to drop.
+node_modules/figlet/**
+node_modules/fastify/**
+node_modules/@fastify/**
+node_modules/pino/**
+node_modules/pino-*/**
+node_modules/sonic-boom/**
+node_modules/thread-stream/**
+node_modules/find-my-way/**
+node_modules/avvio/**
+node_modules/light-my-request/**
+node_modules/fast-json-stringify/**
+node_modules/@fastify-userland/**
+node_modules/yaml/**
+node_modules/jszip/**
+node_modules/pako/**
+
+# Trim generic dead weight from remaining packages
+node_modules/**/*.md
+node_modules/**/*.markdown
+node_modules/**/test/**
+node_modules/**/tests/**
+node_modules/**/example/**
+node_modules/**/examples/**
+node_modules/**/.github/**
