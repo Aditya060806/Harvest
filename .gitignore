@@ -32,6 +32,9 @@ Thumbs.db
 # VS Code extension package output
 *.vsix
 
+# npm auth (never commit tokens)
+.npmrc
+
 # Harvest runtime + reports
 .harvest/
 .harvest-opened
