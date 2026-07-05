@@ -19,7 +19,7 @@
     "build": "tsc -p ./"
   },
   "dependencies": {
-    "@harvest/core": "workspace:*"
+    "@harvest/core": "*"
   },
   "peerDependencies": {
     "@angular/core": ">=15.0.0",

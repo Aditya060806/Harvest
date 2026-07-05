@@ -1,39 +1,59 @@
-// index.d.ts
+// Type definitions for @harvest/core
 
-/**
- * One result from a single plugin.
- */
+export type Severity = 'error' | 'warning' | 'info';
+
+export type Rating = 'excellent' | 'good' | 'fair' | 'poor' | 'bad';
+
+export type Mode = 'fast' | 'default' | 'complete';
+
+/** A single finding produced by a plugin. */
+export interface Issue {
+  pluginName: string;
+  filePath: string;
+  line: number;
+  column: number;
+  severity: Severity;
+  message: string;
+  ruleId?: string;
+}
+
+export interface Counts {
+  total: number;
+  error: number;
+  warning: number;
+  info: number;
+  critical: number;
+}
+
 export interface PluginResult {
-  /** How many issues this plugin found */
   count: number;
-  /** A list of human-readable details per issue */
   details: string[];
 }
 
-/**
- * A single issue found by any plugin.
- */
-export interface Issue {
-  file: string;
-  line: number;
-  message: string;
-  plugin: string;
-}
-
-/**
- * The full result of running `scan()`.
- * @param target  Path or glob(s) to scan
- * @param options.mode  `'fast' | 'complete'`
- * @param options.json  If `true`, just give me raw JSON
- */
-export function scan(
-  target: string | string[],
-  options?: { mode?: 'fast' | 'complete'; json?: boolean }
-): Promise<ScanResult>;
-
 export interface ScanResult {
-  overallScore: number;
-  pluginResults: Record<string, PluginResult>;
+  target: string;
+  mode: Mode;
+  score: number;
+  rating: Rating;
+  exitCode: number;
   issues: Issue[];
+  /** Backward-compatible alias of `issues`. */
+  messages: Issue[];
+  pluginResults: Record<string, PluginResult>;
+  counts: Counts;
   durationMs: number;
 }
+
+export interface ScanOptions {
+  mode?: Mode;
+  incremental?: boolean;
+  plugin?: string | null;
+  stream?: boolean;
+  config?: unknown;
+}
+
+export function scan(target: string | string[], options?: ScanOptions): Promise<ScanResult>;
+export function getRating(score: number): Rating;
+export const DEFAULT_WEIGHTS: Record<string, number>;
+
+export default scan;

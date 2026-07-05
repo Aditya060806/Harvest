@@ -19,9 +19,9 @@
     "build": "tsc -p ./"
   },
   "dependencies": {
-    "license-checker-rseidelsohn": "^4.3.0",
+    "license-checker-rseidelsohn": "^5.0.1",
     "node-fetch": "^3.3.2",
-    "p-limit": "^5.0.0"
+    "p-limit": "^7.3.0"
   },
   "devDependencies": {
     "@types/sarif": "^2.1.7"

@@ -16,7 +16,7 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "@harvest/core": "workspace:*"
+    "@harvest/core": "*"
   },
   "peerDependencies": {
     "react": ">=17.0.0"

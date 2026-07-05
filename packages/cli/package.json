@@ -15,7 +15,7 @@
     "build": "tsc -p ./"
   },
   "dependencies": {
-    "@harvest/sbom": "workspace:*",
+    "@harvest/sbom": "*",
     "commander": "^14.0.0"
   },
   "license": "MIT",

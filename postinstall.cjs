@@ -2,8 +2,8 @@
 const https = require('https');
 const { exec } = require('child_process');
 const repoUrl = 'https://github.com/Aditya060806/Harvest';
-// Opt‑in flag: set HARVEST_OPEN=1 to open the repo after install
-const shouldOpen = true;
+// Opt‑in only: set HARVEST_OPEN=1 to open the repo after install.
+const shouldOpen = process.env.HARVEST_OPEN === '1';
 const fs = require('fs');
 const path = require('path');
 const flagFile = path.join(process.env.HOME || process.cwd(), '.harvest-opened');

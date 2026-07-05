@@ -1,36 +1,43 @@
 import { Plugin } from '../src/plugin-interface.js';
-import fs from 'node:fs/promises';
+
+// Non-global regexes: `.test()` is stateless, so line-by-line scanning is reliable.
+const PATTERNS = [
+  { pattern: /rm\s+-rf\s+(?:\/|~|\$HOME)/i, message: 'Destructive command: rm -rf on a root/home path' },
+  { pattern: /:\(\)\s*\{\s*:\|:&\s*\};:/, message: 'Fork-bomb pattern detected' },
+  { pattern: /\beval\s*\(/i, message: 'Use of eval()' },
+  { pattern: /new\s+Function\s*\(/i, message: 'Dynamic code execution via new Function()' },
+  { pattern: /child_process[\s\S]{0,20}\bexec(?:Sync)?\s*\(/i, message: 'Shell execution via child_process.exec' },
+  { pattern: /\bos\.system\s*\(/i, message: 'Use of os.system()' },
+  { pattern: /\bsubprocess\.(?:call|Popen|run)\s*\(/i, message: 'Python subprocess execution' },
+  { pattern: /curl\s+[^|]*\|\s*(?:sudo\s+)?(?:ba)?sh/i, message: 'Piping a remote download straight into a shell' },
+];
 
 export class CriticalPlugin extends Plugin {
   static pluginName = 'critical';
 
-  static applies(filePath) {
-    return true; // scan all files
+  static applies() {
+    return true; // critical patterns can appear in any file type
   }
 
   async run(filePath, { content }) {
-    const patterns = [
-      { pattern: /rm\s+-rf\s+\//gi, message: 'Potential dangerous command: rm -rf /' },
-      { pattern: /eval\s*\(/gi, message: 'Use of eval() detected' },
-      // add more patterns as needed
-    ];
-    const messages = [];
+    if (!content) return [];
+    const issues = [];
     const lines = content.split('\n');
 
-    for (const { pattern, message } of patterns) {
-      for (let i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
+      for (const { pattern, message } of PATTERNS) {
         if (pattern.test(lines[i])) {
-          messages.push({
+          issues.push({
             pluginName: this.constructor.pluginName,
             filePath,
             line: i + 1,
-            column: 0,
+            column: (lines[i].search(pattern) ?? 0) + 1,
             severity: 'error',
-            message: `${message} in line ${i + 1}`,
+            message,
           });
         }
       }
     }
-    return messages;
+    return issues;
   }
 }

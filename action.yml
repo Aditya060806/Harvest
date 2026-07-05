@@ -1,0 +1,56 @@
+name: 'Harvest Scan'
+description: 'Fast, plugin-driven security + code-quality scan with a single 0–100 score. Outputs SARIF for GitHub Code Scanning.'
+author: 'Aditya Pandey'
+branding:
+  icon: 'shield'
+  color: 'orange'
+
+inputs:
+  target:
+    description: 'File or directory to scan.'
+    required: false
+    default: '.'
+  mode:
+    description: 'Scan mode: fast | default | complete.'
+    required: false
+    default: 'complete'
+  sarif-file:
+    description: 'Path to write the SARIF report to.'
+    required: false
+    default: 'harvest.sarif'
+  fail-on-error:
+    description: 'Fail the job when the scan exit code is non-zero.'
+    required: false
+    default: 'true'
+  baseline:
+    description: 'Only fail on issues not present in .harvest/baseline.json.'
+    required: false
+    default: 'false'
+
+outputs:
+  sarif-file:
+    description: 'Path to the generated SARIF report.'
+    value: ${{ inputs.sarif-file }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Harvest
+      shell: bash
+      run: |
+        BASELINE_FLAG=""
+        if [ "${{ inputs.baseline }}" = "true" ]; then BASELINE_FLAG="--baseline"; fi
+
+        set +e
+        npx --yes harvest@latest "${{ inputs.target }}" \
+          --${{ inputs.mode }} $BASELINE_FLAG \
+          --sarif -o "${{ inputs.sarif-file }}" --no-banner
+        SARIF_CODE=$?
+
+        # Human-readable summary in the log
+        npx --yes harvest@latest "${{ inputs.target }}" --${{ inputs.mode }} $BASELINE_FLAG --no-banner || true
+
+        if [ "${{ inputs.fail-on-error }}" = "true" ] && [ $SARIF_CODE -ne 0 ]; then
+          echo "::error::Harvest scan reported issues (exit $SARIF_CODE)."
+          exit $SARIF_CODE
+        fi

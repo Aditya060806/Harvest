@@ -1,189 +1,183 @@
-# harvest
+# 🥕 harvest
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Aditya060806/Harvest/refs/heads/main/img/logo.svg" width="200" height="179" alt="">
-  <br><strong>Command-line tool for detecting vulnerabilities in files and directories.</strong>
-  <br><a href="https://github.com/Aditya060806/Harvest">GitHub Repository</a>
+  <img src="https://raw.githubusercontent.com/Aditya060806/Harvest/refs/heads/main/img/logo.svg" width="180" height="160" alt="Harvest logo">
+  <br><strong>Fast, plugin-driven security &amp; code-quality scanner. One command, one score.</strong>
+  <br><a href="https://github.com/Aditya060806/Harvest">GitHub</a> · <a href="https://www.npmjs.com/package/harvest">npm</a>
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/Aditya060806/Harvest/refs/heads/main/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/Aditya060806/Harvest.svg)](https://github.com/Aditya060806/Harvest/issues)
-[![GitHub stars](https://img.shields.io/github/stars/Aditya060806/Harvest.svg?style=social&label=Stars)](https://github.com/Aditya060806/Harvest/stargazers)
-[![Downloads](https://img.shields.io/npm/dt/harvest.svg)](https://www.npmjs.com/package/harvest)
+<p align="center">
+  <a href="https://github.com/Aditya060806/Harvest/actions/workflows/ci.yml"><img src="https://github.com/Aditya060806/Harvest/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://raw.githubusercontent.com/Aditya060806/Harvest/refs/heads/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://www.npmjs.com/package/harvest"><img src="https://img.shields.io/npm/v/harvest.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/harvest"><img src="https://img.shields.io/npm/dt/harvest.svg" alt="Downloads"></a>
+</p>
 
-A **fast**, **extensible**, and **plugin-driven** code scanner for JavaScript, TypeScript, and any other file in your project.  
-It evaluates code quality, complexity, security vulnerabilities, and more, producing a **single aggregated score** (0–100) and actionable feedback.
+Harvest scans your files for security risks and quality problems using a set of composable plugins, then boils everything down to a single **0–100 score** and a letter **grade** — with actionable, file-and-line feedback. It runs locally, in CI, and in your editor.
 
-## Table of Contents
+```console
+$ npx harvest src/
 
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Plugin Management](#plugin-management)
-- [API](#api)
-- [Plugin Development](#plugin-development)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [Support](#support)
-- [License](#license)
+  B+  87/100  ███████████████████░░░░░  good
+  0 error  4 warning  0 info  · 4 total · 210ms
 
-## Features
+  src/payments.js
+     WARN   42:10  Use of eval()  (heuristic)
+     WARN   7:3    Possible hard-coded credential  (heuristic)
 
-- 🧠 **AI-powered scanning**: Uses a lightweight, local AI model to detect potentially malicious code.
--  Datenbank für Exploits **Exploit-DB-Integration**: Sucht in der OSV-Datenbank nach bekannten Schwachstellen in Ihren Abhängigkeiten.
-- 🛡️ **Critical patterns**: Immediately fails on destructive or remote‐execution hooks (`rm -rf`, `include()`, `eval()`, etc.).
-- 📏 **ESLint integration**: Runs ESLint (v9+) with recommended rules on JS/TS files.
-- 🔢 **Cyclomatic complexity**: Uses `typhonjs-escomplex` to penalize high-complexity code.
-- 🔍 **AST-based security**: Leverages `@nodesecure/js-x-ray` to detect injection patterns.
-- 🌐 **Multi-language rules**: Integrates Semgrep OWASP Top Ten rules for 35+ languages.
-- 🔎 **Heuristic scanning**: Regex-based patterns for generic vulnerabilities across all file types.
-- 🛠️ **Dependency audit**: Runs `npm audit` and scores known CVEs.
-- ⚙️ **Plugin architecture**: Easily add or remove checks by dropping in plugins under `plugins/`.
-- 🐳 **Dockerfile scanning**: Checks for common misconfigurations in `Dockerfile`.
-
-## Recent Improvements
-
--   **Enhanced CLI**: Added a new `outdated` command to check for outdated dependencies.
--   **New Plugin**: Added a new `dockerfile` plugin to check for common misconfigurations in `Dockerfile`.
--   **Performance Boost**: Parallelized plugin execution and implemented file content caching to improve performance.
--   **CI/CD Pipeline**: Implemented a GitHub Actions workflow to automatically test and lint the code.
--   **Code Refactoring**: Refactored the code for better maintainability and readability.
-
-## Installation
-
-Install globally via npm:
-
-```bash
-npm install -g harvest
+  ▲ +5 since last run (was 82)
 ```
 
-During development:
+## Contents
+
+- [Why Harvest](#why-harvest)
+- [Quick start](#quick-start)
+- [Usage](#usage)
+- [Output formats](#output-formats)
+- [GitHub Action](#github-action)
+- [Baseline (ratchet) mode](#baseline-ratchet-mode)
+- [Programmatic API](#programmatic-api)
+- [REST API](#rest-api)
+- [Plugins](#plugins)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Why Harvest
+
+- **One number to watch.** Every scan yields a single score and grade, so quality is easy to track over time.
+- **Zero config.** Useful the moment you run it — no config file required.
+- **Batteries included.** Critical-pattern detection, heuristics, ESLint, cyclomatic complexity, AST security (js-x-ray), Semgrep OWASP rules, `npm audit`, OSV CVE lookup, Dockerfile checks, and an NLP pass.
+- **CI-native.** Meaningful exit codes, SARIF output for GitHub Code Scanning, and a ready-made GitHub Action.
+- **Extensible.** Drop a file in `plugins/` (or run `harvest plugin create`) and it's picked up automatically.
+
+## Quick start
 
 ```bash
-git clone https://github.com/Aditya060806/Harvest.git
-cd Harvest
-npm install
-npm link
+# Try it with no install
+npx harvest .
+
+# Or install globally
+npm install -g harvest
+harvest .
 ```
 
 ## Usage
 
 ```bash
-harvest [options] <target>
+harvest [options] [target]
 ```
 
-- `<target>`: File or directory to scan (defaults to current folder).
-- `-f, --fast` : Quick scan (ESLint + heuristics only).
-- `-c, --complete` : Full scan (all checks).
-- `-j, --json` : Output machine-readable JSON.
-- `-v, --version` : Show the installed version of harvest.
-- `--verbose`: Output detailed logs during scanning.
-
-### Examples
+| Option | Description |
+| --- | --- |
+| `-f, --fast` | Fast scan: critical + heuristics + ESLint |
+| `-c, --complete` | Complete scan: every plugin |
+| `-d, --default` | Balanced default (used when no mode is given) |
+| `-j, --json` | Machine-readable JSON |
+| `--sarif` | SARIF 2.1.0 (GitHub Code Scanning) |
+| `-o, --output <file>` | Write the report to a file |
+| `-i, --incremental` | Scan only files changed vs git `HEAD` |
+| `-p, --plugin <name>` | Run a single plugin |
+| `--baseline` | Only fail on issues not in the saved baseline |
+| `--no-banner` | Hide the ASCII banner |
 
 ```bash
-# Fast lint + heuristics on current folder
-harvest -f
-
-# Full scan on src/ directory
-harvest src/ -c
-
-# JSON output for CI pipelines
-harvest . -c --json > report.json
+harvest -f                      # fast scan of the current folder
+harvest src/ -c                 # complete scan of src/
+harvest . --json > report.json  # JSON for tooling
+harvest . --sarif -o harvest.sarif
+harvest . -p critical           # run just the critical plugin
 ```
 
-### Supply-Chain (SBOM) Generation
+Exit codes: `0` clean/acceptable, `1` needs attention, `2` failing (or critical issue), `3` unexpected error.
 
-Generate a Software Bill of Materials (SBOM) with embedded vulnerability information from the OSV public API. Supports CycloneDX XML and SARIF formats.
+## Output formats
+
+- **Human** (default): colourful, grouped by file, with a score bar and trend.
+- **JSON** (`--json`): the full structured result — `score`, `rating`, `issues[]`, `counts`, `durationMs`.
+- **SARIF** (`--sarif`): drops straight into GitHub Code Scanning so findings show up inline on PRs.
+
+## GitHub Action
+
+Add security + quality gating to any repo:
+
+```yaml
+# .github/workflows/harvest.yml
+name: Harvest
+on: [push, pull_request]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Aditya060806/Harvest@v1
+        with:
+          target: '.'
+          mode: 'complete'
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: harvest.sarif
+```
+
+Inputs: `target`, `mode` (`fast|default|complete`), `sarif-file`, `fail-on-error`, `baseline`.
+
+## Baseline (ratchet) mode
+
+Adopt Harvest on an existing codebase without drowning in the current backlog. Record today's issues as accepted, then fail CI only on **new** ones.
 
 ```bash
-# Generate CycloneDX SBOM for the current directory (default)
-harvest sbom .
-
-# Generate SARIF output instead of XML
-harvest sbom . --sarif
+harvest baseline .        # writes .harvest/baseline.json
+harvest . --baseline      # known issues are ignored; only new issues fail
 ```
 
-### Doctor Command
+Harvest also records each run's score in `.harvest/history.json` and prints the delta since the previous run.
 
-Check for potential issues with your `harvest` setup.
-
-```bash
-harvest doctor
-```
-
-### Outdated Command
-
-Check for outdated dependencies.
-
-```bash
-harvest outdated
-```
-
-## Plugin Management
-
-`harvest` provides commands to manage its plugins:
-
-- `list`: List all available plugins.
-- `enable <plugin-name>`: Enable a plugin.
-- `disable <plugin-name>`: Disable a plugin.
-- `create <plugin-name>`: Create a new plugin from a template.
-
-## API
-
-### Programmatic Usage
-
-Use `harvest` programmatically in your own projects.
+## Programmatic API
 
 ```js
 import { scan } from 'harvest';
 
-(async () => {
-  const result = await scan('src/', { mode: 'complete' });
-  console.log(result);
-})();
+const result = await scan('src/', { mode: 'complete' });
+console.log(result.score, result.rating);
+for (const issue of result.issues) {
+  console.log(`${issue.filePath}:${issue.line} ${issue.message} (${issue.pluginName})`);
+}
 ```
 
-### REST API
+## REST API
 
-The REST API allows you to run scans via HTTP.
+Run the server (`npm run start-api`) to expose:
 
-- **POST /scan**: Run a scan.
-  - **Body**: `{ "target": "./src", "mode": "fast" }`
-- **GET /scan/stream**: Get real-time scan results using Server-Sent Events.
-  - **Query Params**: `target`, `mode`
+- `POST /scan` — body `{ "target": "./src", "mode": "fast" }`
+- `GET /scan/stream` — Server-Sent Events with live progress
+- Swagger UI at `/docs`
 
-For more details, see the [OpenAPI specification](.github/openapi.yaml).
+## Plugins
 
-## Plugin Development
-
-Plugins are the core of `harvest`. To create a new plugin, run:
+A plugin is a class extending `Plugin` with a static `applies(file)` and an async `run(file, ctx)` returning issues. The engine auto-discovers every plugin in the plugins directory — no registration needed.
 
 ```bash
-harvest plugin create my-plugin
+harvest plugin list
+harvest plugin create my-rule   # scaffolds from the template
+harvest plugin disable semgrep
 ```
 
-This will generate a new plugin file in the `plugins/` directory. A plugin is a class that extends `Plugin` and implements two methods:
-
-- `applies(file: string)`: A static method that returns `true` if the plugin should be run on the given file.
-- `run(file: string, context: object)`: An async method that performs the scan and returns an array of issues.
-
-See the existing plugins for examples.
+Built-in plugins: `critical`, `heuristic`, `eslint`, `complexity`, `dockerfile`, `xray`, `semgrep`, `audit`, `osv`, `ai`.
 
 ## Configuration
 
-Create a `harvest.config.js` file in your project root to customize `harvest`.
+Configuration is optional. Create `harvest.config.js` in your project root to tune weights, thresholds, and which plugins run.
 
 ```js
 // harvest.config.js
 export default {
-  weights: {
-    eslint: 1.5,
-    xray: 10,
-  },
-  thresholds: {
-    complexity: 12,
-  },
+  weights: { eslint: 2, xray: 8, osv: 10 },
+  thresholds: { complexity: 12 },
   plugins: {
     semgrep: { enabled: false },
   },
@@ -192,39 +186,16 @@ export default {
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+Contributions are welcome. Clone the repo, `npm install`, and:
 
-### Development
+```bash
+npm test        # run the test suite
+npm run lint    # lint & auto-fix
+node cli.js .   # run the CLI from source
+```
 
-To get started with development:
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/Aditya060806/Harvest.git
-    ```
-2.  Install dependencies:
-    ```bash
-    cd Harvest
-    npm install
-    ```
-3.  Link the package to use the `harvest` command globally:
-    ```bash
-    npm link
-    ```
-
-### Pull Requests
-
-When submitting a pull request, please make sure to:
-
--   Follow the existing code style.
--   Add tests for your changes.
--   Update the documentation if necessary.
--   Run `npm test` and `npm run lint` before submitting.
-
-## Support
-
-If you find `harvest` useful, please consider [supporting the project](https://github.com/sponsors/Aditya060806).
+Please add tests for changes and run `npm test` before opening a PR.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © Aditya Pandey

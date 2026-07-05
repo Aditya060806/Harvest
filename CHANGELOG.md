@@ -1,3 +1,28 @@
+## [6.0.1] - 2026-07-05
+
+Project renamed to **Harvest** (CLI command `harvest`), plus a major foundation overhaul.
+
+### Added
+- Single consolidated scanning engine in `@harvest/core` used by the CLI, REST API, and editor.
+- Dynamic plugin discovery — new plugins in `plugins/` are picked up automatically.
+- Gorgeous terminal report: 0–100 score, letter grade, score bar, per-file grouping.
+- `--sarif` output for GitHub Code Scanning and `--json` structured output.
+- `--output <file>` to write reports to disk.
+- Baseline / ratchet mode (`harvest baseline`, `--baseline`) to fail only on new issues.
+- Score trend history under `.harvest/history.json` with a delta since the last run.
+- Working `harvest plugin create` backed by a real plugin template.
+- Ready-to-use GitHub Action (`action.yml`) and a CI matrix (Node 18/20/22) with a self-scan.
+- Test suite (Jest) covering the engine and reporter.
+
+### Fixed
+- CLI now actually loads plugins (previously scanned with zero plugins).
+- Registered every plugin, including `ai` and `osv`.
+- Stateful global-regex bug in `critical`/`heuristic` that skipped matches.
+- Normalised the Dockerfile plugin's output shape.
+- Per-plugin error isolation so one failing plugin no longer aborts the scan.
+- `harvest` now installs cleanly from npm (self-contained, no unpublished scoped deps).
+- Made the postinstall browser-open strictly opt-in (`HARVEST_OPEN=1`).
+
 ## [3.0.2] - 2025-07-04
 
 ### Added
