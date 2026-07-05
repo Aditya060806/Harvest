@@ -11,6 +11,7 @@
     "Linters",
     "Other"
   ],
+  "icon": "icon.png",
   "main": "./out/extension.js",
   "activationEvents": [
     "onStartupFinished"

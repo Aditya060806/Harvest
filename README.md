@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Aditya060806/Harvest/refs/heads/main/img/logo.svg" width="140" height="140" alt="Harvest logo">
+<img src="https://raw.githubusercontent.com/Aditya060806/Harvest/refs/heads/main/img/logo.png" width="140" height="140" alt="Harvest logo">
 
 # 🥕 harvest-clo
 
