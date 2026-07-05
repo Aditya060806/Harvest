@@ -36,4 +36,9 @@ jobs:
         run: npm install
 
       - name: Publish (OIDC trusted publishing)
-        run: npm publish --provenance --access public
+        run: npm publish --access public
+        env:
+          # Empty (not unset) token forces npm to fall back to the OIDC flow
+          # instead of using setup-node's placeholder _authToken. See npm/cli#8730.
+          NODE_AUTH_TOKEN: ''
+          NPM_CONFIG_PROVENANCE: 'true'
