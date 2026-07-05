@@ -12,38 +12,69 @@ Scan your code for security risks and quality issues with a suite of composable 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/node/v/harvest-scan.svg)](https://www.npmjs.com/package/harvest-scan)
 
-[Quick start](#-quick-start) · [How it works](#-how-it-works) · [Comparison](#-how-harvest-compares) · [Scoring](#-scoring-model) · [Performance](#-performance--efficiency) · [CLI](#-cli-reference) · [CI](#-github-action)
-
 </div>
 
 ---
 
-```console
-$ npx harvest-scan src/
+## Table of contents
 
-  B+  87/100  ███████████████████░░░░░  good
-  0 error  4 warning  0 info  · 4 total · 210ms
+- [The 30-second tour](#-the-30-second-tour)
+- [Why Harvest](#-why-harvest)
+- [Quick start](#-quick-start)
+- [How it works](#-how-it-works)
+- [Plugin catalog](#-plugin-catalog)
+- [Scan modes](#-scan-modes)
+- [How Harvest compares](#-how-harvest-compares)
+- [Scoring model](#-scoring-model)
+- [Performance & efficiency](#-performance--efficiency)
+- [Output formats](#-output-formats)
+- [CLI reference](#-cli-reference)
+- [GitHub Action](#-github-action)
+- [Baseline (ratchet) mode](#-baseline-ratchet-mode)
+- [VS Code extension](#-vs-code-extension)
+- [Programmatic & REST API](#-programmatic--rest-api)
+- [Writing a plugin](#-writing-a-plugin)
+- [Configuration](#-configuration)
+- [FAQ](#-faq)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## 🎬 The 30-second tour
+
+A file with a problem:
+
+```console
+$ npx harvest-scan src/payments.js -c
+
+  F  0/100  ░░░░░░░░░░░░░░░░░░░░░░░░  bad
+  1 error  2 warning  0 info  · 3 total · 180ms
 
   src/payments.js
-     WARN   42:10  Use of eval()  (heuristic)
-     WARN   7:3    Possible hard-coded credential  (heuristic)
-
-  ▲ +5 since last run (was 82)
+     ERROR  42:10  Use of eval()                     (critical)
+     WARN   42:10  Use of eval()                     (heuristic)
+     WARN   7:3    Possible hard-coded credential    (heuristic)
 ```
 
-## ✨ Highlights
+A clean file:
 
-| | |
-| --- | --- |
-| 🎯 **One number to watch** | Every scan yields a single score + grade, so quality is trivial to track over time. |
-| ⚡ **Fast & parallel** | Plugins run concurrently with per-file content caching; binaries and huge files are skipped. |
-| 🔌 **10 plugins built in** | Critical patterns, heuristics, ESLint, complexity, AST security, Semgrep, `npm audit`, OSV CVEs, Dockerfile, NLP. |
-| 🧩 **Auto-discovered plugins** | Drop a file in `plugins/` (or `harvest plugin create`) — it's picked up automatically. |
-| 🛠️ **Autofix** | `--fix` applies safe ESLint fixes before scanning. |
-| 🧾 **SARIF + JSON** | Findings show up inline on GitHub PRs; JSON for any tooling. |
-| 🪜 **Baseline / ratchet** | Adopt on legacy code and fail CI only on *new* issues. |
-| 🤖 **CI-native** | Real exit codes and a ready-made GitHub Action. |
-| 🧰 **Zero config** | Useful the moment you run it — a config file is optional. |
+```console
+$ npx harvest-scan src/utils.js
+
+  A+  100/100  ████████████████████████  excellent
+  0 error  0 warning  0 info  · 0 total · 24ms
+
+  ✓ No issues found. Clean harvest! 🌾
+```
+
+## 💡 Why Harvest
+
+Most teams run a lint tool, a dependency auditor, and maybe a SAST scanner — three tools, three outputs, three mental models. Harvest runs them together and answers one question: **is this code better or worse than last time?**
+
+- **One number to watch.** A single 0–100 score + grade makes quality trends obvious across commits, PRs, and releases.
+- **Batteries included.** Ten plugins cover destructive patterns, dependency CVEs, AST security, complexity, lint, Dockerfiles, and more.
+- **Honest by default.** Critical findings fail hard; everything else is weighted, so noise doesn't drown out real risk.
+- **Meets you everywhere.** Same engine and score in the CLI, a REST API, a GitHub Action, and a VS Code extension.
 
 ## 🚀 Quick start
 
@@ -64,6 +95,8 @@ harvest . --sarif -o harvest.sarif
 harvest . --json > report.json
 ```
 
+Requires **Node.js 18+**.
+
 ## 🧠 How it works
 
 Harvest is a small orchestrator around a set of independent plugins. Each plugin decides which files it `applies` to and returns structured issues; the engine isolates failures, aggregates issues, and computes a weighted score.
@@ -83,12 +116,55 @@ flowchart LR
   I --> L[SARIF]
 ```
 
+The scan lifecycle, end to end:
+
+```mermaid
+sequenceDiagram
+  participant U as CLI / API / Editor
+  participant E as Engine
+  participant P as Plugins
+  U->>E: scan(target, { mode })
+  E->>E: discover files (gitignore, skip binaries/large)
+  E->>E: load config + auto-discover plugins
+  loop each active plugin, in parallel
+    E->>P: applies(file)?
+    P-->>E: matching files
+    E->>P: run(file, { content })
+    P-->>E: issues[]  (or throws → isolated)
+  end
+  E->>E: weight issues → score (any critical ⇒ 0)
+  E-->>U: { score, rating, issues, counts, durationMs }
+```
+
 **Design principles**
 
 - **Isolation** — a plugin that throws (parse error, missing tool, API drift) never aborts the scan.
 - **Determinism** — the same input yields the same score; results are consistent across CLI, API, and editor.
 - **Bounded work** — files over 512 KB and known binary types are skipped; content is read once and cached.
 - **Extensibility** — plugins are auto-loaded from the plugins directory, so adding checks needs no wiring.
+
+## 🧩 Plugin catalog
+
+| Plugin | What it catches | Applies to |
+| --- | --- | --- |
+| `critical` | Destructive / RCE patterns: `rm -rf /`, `eval()`, `new Function()`, `child_process.exec`, `os.system`, `subprocess`, `curl … \| sh`, fork bombs. **Any hit fails the scan.** | all files |
+| `heuristic` | Risky calls & secrets: `eval`, `execSync`, PHP `shell_exec`/`base64_decode`/superglobals, `preg_replace /e`, hard-coded credentials. | all files |
+| `eslint` | Runs ESLint on your project and counts errors (uses your config). | JS/TS |
+| `complexity` | Functions whose cyclomatic complexity exceeds the threshold. | JS/TS |
+| `xray` | AST-level security analysis via `@nodesecure/js-x-ray` (obfuscation, suspicious imports, unsafe statements). | JS/TS |
+| `dockerfile` | Image hygiene: `FROM` first, non-root `USER`, pinned tags, leaked secrets, `apt/pip` flags, exec-form `CMD`, `HEALTHCHECK`. | `Dockerfile*` |
+| `semgrep` | OWASP Top Ten rules across 30+ languages (if `semgrep` is available). | many langs |
+| `audit` | `npm audit` severity rolled into a score. | `package.json` |
+| `osv` | Known CVEs for your dependencies via the OSV.dev API. | `package.json` |
+| `ai` | NLP pass (`compromise`) flagging dangerous security terms in any text. | all files |
+
+## 🎛️ Scan modes
+
+| Mode | Flag | Plugins run | Best for |
+| --- | --- | --- | --- |
+| Fast | `-f` | `critical`, `heuristic`, `eslint` | pre-commit hooks, editor |
+| Default | *(none)* / `-d` | + `complexity`, `dockerfile` | everyday local runs |
+| Complete | `-c` | **all 10** plugins | CI, releases, audits |
 
 ## 📊 How Harvest compares
 
@@ -111,6 +187,8 @@ Harvest bundles many single-purpose tools behind one score. This is a **capabili
 | Free & MIT | ✅ | ✅ | ✅ | ✅² | ➖ |
 
 <sub>¹ Offline in `fast`/`default` mode; `complete` mode uses the network for `osv` (CVE lookup) and optionally `semgrep`. ² Semgrep OSS is free; some rulesets/features are commercial.</sub>
+
+**When to reach for Harvest:** you want one command and one score that combines security + quality signals, gate-able in CI, without stitching several tools together. For deep, single-purpose analysis (e.g. exhaustive SAST), keep using the specialist tool alongside — Harvest happily wraps Semgrep and ESLint.
 
 ## 🎯 Scoring model
 
@@ -271,7 +349,15 @@ harvest . --baseline      # known issues ignored; only new issues fail CI
 
 Harvest also records each run's score in `.harvest/history.json` and prints the delta since the previous run.
 
-## 🧑‍💻 Programmatic API
+## 🧩 VS Code extension
+
+**Harvest Guard** runs a fast scan on open/save, shows findings as inline diagnostics, and displays a live score in the status bar.
+
+- Commands: **Harvest Guard: Scan Current File**, **Harvest Guard: Scan Workspace**
+- Powered by the same `harvest-scan` engine
+- Build it from source: `cd harvest-guard && npm install && npx @vscode/vsce package` → produces `harvest-guard-1.0.0.vsix`, installable via **Extensions → Install from VSIX…**
+
+## 🧑‍💻 Programmatic & REST API
 
 ```js
 import { scan, fix } from 'harvest-scan';
@@ -285,15 +371,13 @@ for (const issue of result.issues) {
 }
 ```
 
-### REST API
-
-Run `npm run start-api` to expose:
+**REST API** — run `npm run start-api` to expose:
 
 - `POST /scan` — body `{ "target": "./src", "mode": "fast" }`
 - `GET /scan/stream` — Server-Sent Events with live progress
 - Swagger UI at `/docs`
 
-## 🔌 Plugins
+## 🔌 Writing a plugin
 
 A plugin is a class extending `Plugin` with a static `applies(file)` and an async `run(file, ctx)` returning issues. The engine auto-discovers every plugin in the plugins directory — no registration needed.
 
@@ -326,19 +410,44 @@ Configuration is optional. Create `harvest.config.js` in your project root to tu
 ```js
 // harvest.config.js
 export default {
-  weights: { eslint: 2, xray: 8, osv: 10 },
-  thresholds: { complexity: 12 },
+  weights: {            // per-issue score penalty (overrides defaults)
+    eslint: 2,
+    xray: 8,
+    osv: 10,
+  },
+  thresholds: {
+    complexity: 12,     // cyclomatic complexity limit
+  },
   plugins: {
-    semgrep: { enabled: false },
+    semgrep: { enabled: false },   // disable a plugin entirely
   },
 };
 ```
+
+## ❓ FAQ
+
+**Does it send my code anywhere?**
+No. `fast` and `default` modes run entirely offline. In `complete` mode, `osv` sends only your dependency **names and versions** (from `package.json`) to the public OSV.dev API, and `semgrep` (if installed) runs locally.
+
+**Which languages are supported?**
+JavaScript/TypeScript get the deepest coverage (lint, complexity, AST). `critical`, `heuristic`, `ai`, and `semgrep` work across many languages, and `dockerfile` covers container images.
+
+**How do I ignore files?**
+Harvest respects your `.gitignore` and skips `node_modules`, `dist`, `out`, `build`, `coverage`, binaries, and files over 512 KB. Disable individual plugins in `harvest.config.js`.
+
+**Why a single score?**
+Because trends beat snapshots. One number makes it obvious whether a change improved or regressed quality — perfect for PR gates and dashboards.
+
+**It failed my CI — how do I adopt gradually?**
+Use [baseline mode](#-baseline-ratchet-mode): record today's issues once, then only *new* issues fail the build.
 
 ## 🗺️ Roadmap
 
 - [x] Consolidated engine, SARIF, baseline, score trend
 - [x] Autofix (`--fix`)
 - [x] GitHub Action
+- [x] VS Code extension (buildable `.vsix`)
+- [ ] Publish the extension to the Marketplace
 - [ ] Editor live diagnostics + `--watch`
 - [ ] Hosted score badge endpoint
 - [ ] More language-native plugins
