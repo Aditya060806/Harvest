@@ -12,7 +12,7 @@ import { listPlugins, enablePlugin, disablePlugin, createPlugin } from './plugin
 import { doctor } from './doctor.js';
 import { outdated } from './outdated.js';
 
-const VERSION = '6.0.1';
+const VERSION = '1.0.0';
 
 function banner() {
   if (process.stdout.isTTY && !process.env.CI && !process.env.NO_BANNER) {

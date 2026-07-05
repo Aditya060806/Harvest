@@ -1,6 +1,6 @@
 {
   "name": "@harvest/sbom",
-  "version": "6.0.1",
+  "version": "1.0.0",
   "description": "Software Bill of Materials (CycloneDX/SARIF) generator with OSV enrichment for Harvest.",
   "type": "module",
   "main": "./dist/index.js",

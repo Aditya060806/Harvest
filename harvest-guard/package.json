@@ -2,7 +2,7 @@
   "name": "harvest-guard",
   "displayName": "Harvest Guard",
   "description": "In-editor vulnerability and code-quality scanning powered by Harvest.",
-  "version": "6.0.1",
+  "version": "1.0.0",
   "publisher": "Aditya060806",
   "engines": {
     "vscode": "^1.80.0"

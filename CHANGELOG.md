@@ -1,6 +1,6 @@
-## [6.0.1] - 2026-07-05
+## [1.0.0] - 2026-07-05
 
-Project renamed to **Harvest** (CLI command `harvest`), plus a major foundation overhaul.
+First public release as **harvest-clo** (CLI command `harvest`). Complete foundation overhaul.
 
 ### Added
 - Single consolidated scanning engine in `@harvest/core` used by the CLI, REST API, and editor.
